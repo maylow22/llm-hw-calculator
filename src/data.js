@@ -113,6 +113,17 @@ export const DEFAULT_MODELS = [
   { id: 'gemini-3-1-pro', provider: 'Google', name: 'Gemini 3.1 Pro', in: 2, cached: 0.2, out: 12 },
 ];
 
+// Firemní předplatné: USD za uživatele a měsíc při roční fakturaci (orientačně).
+// Platí se za každého zaměstnance bez ohledu na spotřebu tokenů.
+export const DEFAULT_PLANS = [
+  { id: 'claude-team', provider: 'Anthropic', name: 'Claude Team', seatUsd: 25 },
+  { id: 'claude-team-premium', provider: 'Anthropic', name: 'Claude Team Premium', seatUsd: 150 },
+  { id: 'chatgpt-business', provider: 'OpenAI', name: 'ChatGPT Business', seatUsd: 25 },
+  { id: 'chatgpt-enterprise', provider: 'OpenAI', name: 'ChatGPT Enterprise', seatUsd: 60 },
+  { id: 'gemini-enterprise-business', provider: 'Google', name: 'Gemini Business', seatUsd: 21 },
+  { id: 'gemini-enterprise', provider: 'Google', name: 'Gemini Enterprise', seatUsd: 30 },
+];
+
 // Úrovně spotřeby na zaměstnance a pracovní den. Špička = kolikrát je zátěž v nejrušnější
 // hodině vyšší než průměr přes celý měsíc (730 h): kancelářský provoz 10 h × 22 dní dává
 // ~3,3×, ranní nával ho zvedne dál; agenti běží rovnoměrněji.

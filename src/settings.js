@@ -1,4 +1,4 @@
-// Dialog Nastavení: obecné parametry, stroje a modely. Edituje kopii, uloží až potvrzením.
+// Dialog Nastavení: obecné parametry, stroje, modely a předplatné. Edituje kopii, uloží až potvrzením.
 import { PRICES_AS_OF } from './data.js';
 
 const GENERAL = [
@@ -36,6 +36,12 @@ const MODEL_COLS = [
   ['out', 'Výstup $/1M'],
 ];
 
+const PLAN_COLS = [
+  ['provider', 'Poskytovatel', 'text'],
+  ['name', 'Předplatné', 'text'],
+  ['seatUsd', '$/uživatel/měs.'],
+];
+
 /** Otevře dialog nad kopií cen; onSave(prices) dostane upravenou kopii, onReset() obnoví výchozí. */
 export function openSettings(dialog, prices, { onSave, onReset }) {
   const draft = structuredClone(prices);
@@ -49,6 +55,7 @@ export function openSettings(dialog, prices, { onSave, onReset }) {
       <section><h3>Obecné</h3><div class="grid-general">${GENERAL.map(generalField).join('')}</div></section>
       <section><h3>Stroje</h3>${table(MACHINE_COLS, draft.machines, 'machines')}</section>
       <section><h3>Modely API</h3>${table(MODEL_COLS, draft.models, 'models')}</section>
+      <section><h3>Předplatné</h3>${table(PLAN_COLS, draft.plans, 'plans')}</section>
       <footer>
         <button type="button" data-act="reset" class="ghost">Obnovit výchozí</button>
         <span class="spacer"></span>

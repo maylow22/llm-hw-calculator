@@ -1,5 +1,5 @@
 // Stav aplikace: výchozí data + úpravy cen uložené v prohlížeči.
-import { DEFAULT_MACHINES, DEFAULT_MODELS, DEFAULT_SETTINGS, DEFAULT_USAGE } from './data.js';
+import { DEFAULT_MACHINES, DEFAULT_MODELS, DEFAULT_PLANS, DEFAULT_SETTINGS, DEFAULT_USAGE } from './data.js';
 
 const KEY = 'llm-hw-calculator.v1';
 
@@ -8,6 +8,7 @@ function defaults() {
     settings: DEFAULT_SETTINGS,
     machines: DEFAULT_MACHINES,
     models: DEFAULT_MODELS,
+    plans: DEFAULT_PLANS,
   });
 }
 
@@ -24,6 +25,7 @@ export function loadPrices() {
         ? saved.machines.map((m) => ({ ...base.machines.find((d) => d.id === m.id), ...m }))
         : base.machines,
       models: saved.models?.length ? saved.models : base.models,
+      plans: saved.plans?.length ? saved.plans : base.plans,
     };
   } catch {
     return base;

@@ -72,6 +72,7 @@ button.icon:hover { color: var(--text); }
 .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
 .seg button { border: 0; border-radius: 0; background: transparent; color: var(--muted); padding: 7px 12px; }
 .seg button[aria-pressed="true"] { background: var(--text); color: var(--bg); }
+.seg.billing { margin-bottom: 8px; }
 
 .controls { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 14px; }
 .card, .panel {

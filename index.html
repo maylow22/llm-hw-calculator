@@ -51,6 +51,10 @@
       </div>
       <div class="card">
         <h2><span class="step">3</span>Dnešní poskytovatel</h2>
+        <div class="seg billing" role="group" aria-label="Způsob platby">
+          <button type="button" data-billing="tokens" title="Platba přes API podle spotřebovaných tokenů.">Za tokeny</button>
+          <button type="button" data-billing="seats" title="Firemní předplatné: pevná cena za každého zaměstnance.">Předplatné</button>
+        </div>
         <select id="model" aria-label="Model API"></select>
         <p id="model-spec" class="spec"></p>
       </div>

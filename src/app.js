@@ -13,6 +13,8 @@ const state = {
   usage: initialUsage(),
   machineId: 'rtx-1',
   modelId: 'claude-sonnet-5',
+  planId: 'claude-team',
+  billing: 'tokens', // 'tokens' = API za tokeny, 'seats' = předplatné na zaměstnance
   cur: 'CZK',
   tab: 'cum',
 };
@@ -24,17 +26,23 @@ const load = () => ({ ...state.usage, ...volumeFromUsers(state.usage) });
 
 const other = (cur) => (cur === 'CZK' ? 'EUR' : 'CZK');
 
+// V režimu předplatného je „model“ tarif s cenou za uživatele (seatUsd).
+const offers = () => (state.billing === 'seats' ? state.prices.plans : state.prices.models);
+const seats = () => state.billing === 'seats';
+
 function current() {
-  const { machines, models, settings } = state.prices;
+  const { machines, settings } = state.prices;
   const machine = machines.find((m) => m.id === state.machineId) ?? machines[0];
-  const model = models.find((m) => m.id === state.modelId) ?? models[0];
+  const id = seats() ? state.planId : state.modelId;
+  const model = offers().find((m) => m.id === id) ?? offers()[0];
   return { machine, model, s: settings };
 }
 
 // ---------- vstupy ----------
 
 function fillSelects() {
-  const { machines, models } = state.prices;
+  const { machines } = state.prices;
+  const models = offers();
   $('#machine').innerHTML = machines.map((m) => `<option value="${m.id}">${m.name}</option>`).join('');
   const providers = [...new Set(models.map((m) => m.provider))];
   $('#model').innerHTML = providers
@@ -74,9 +82,16 @@ function bindInputs() {
     render();
   });
   $('#model').addEventListener('change', (e) => {
-    state.modelId = e.target.value;
+    state[seats() ? 'planId' : 'modelId'] = e.target.value;
     render();
   });
+  for (const btn of document.querySelectorAll('[data-billing]')) {
+    btn.addEventListener('click', () => {
+      state.billing = btn.dataset.billing;
+      fillSelects();
+      render();
+    });
+  }
   for (const btn of document.querySelectorAll('[data-cur]')) {
     btn.addEventListener('click', () => {
       state.cur = btn.dataset.cur;
@@ -122,13 +137,16 @@ function render() {
   renderWarnings(sim, machine, total);
   renderTabs();
 
-  const ctx = { cur: state.cur, s, machineName: machine.name, modelName: model.name };
+  const ctx = { cur: state.cur, s, machineName: machine.name, apiName: `${seats() ? 'Předplatné' : 'API'} · ${model.name}` };
   if (state.tab === 'cum') renderCumulative($('#c-cum'), sim, ctx);
   if (state.tab === 'per1m') renderPerMillion($('#c-per1m'), usage, machine, model, ctx);
   if (state.tab === 'compare') renderCompare(usage, model, s);
 
   for (const btn of document.querySelectorAll('[data-cur]')) {
     btn.setAttribute('aria-pressed', String(btn.dataset.cur === state.cur));
+  }
+  for (const btn of document.querySelectorAll('[data-billing]')) {
+    btn.setAttribute('aria-pressed', String(btn.dataset.billing === state.billing));
   }
 }
 
@@ -152,8 +170,10 @@ function renderSpecs(machine, model, s, usage) {
     `${money(price, state.cur, s)} (${money(price, other(state.cur), s)}) · ` +
     `kus zvládne ~${tokens(capacityInM)} vstupních tokenů/měs. při zadané špičce, max. ${machine.maxUnits} ks · ` +
     `referenční model ${machine.refModel}`;
-  $('#model-spec').textContent =
-    `$${model.in} vstup · $${model.cached} cache · $${model.out} výstup za 1M tokenů`;
+  $('#model-spec').textContent = seats()
+    ? `$${model.seatUsd} za uživatele/měs. × ${usage.employees.toLocaleString('cs-CZ')} zaměstnanců, ` +
+      'nezávisle na spotřebě · tarify mají limity použití, agenty a velké objemy nemusí pokrýt'
+    : `$${model.in} vstup · $${model.cached} cache · $${model.out} výstup za 1M tokenů`;
 }
 
 function kpi(label, value, sub, tone = '') {
@@ -196,7 +216,7 @@ function renderKpis(sim, unit, total, machine, s) {
       );
     }
   }
-  tiles.push(kpi('API měsíčně', apiMain, `${apiAlt} · ${tokens(total)} tokenů`));
+  tiles.push(kpi(seats() ? 'Předplatné měsíčně' : 'API měsíčně', apiMain, `${apiAlt} · ${tokens(total)} tokenů`));
   if (sim.feasible) {
     const [hwMain, hwAlt] = both(first.opex);
     tiles.push(kpi('Provoz HW měsíčně', hwMain, `${hwAlt} · bez pořízení`));

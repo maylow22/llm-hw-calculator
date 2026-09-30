@@ -52,7 +52,7 @@ let cumulative;
 let per1m;
 
 export function renderCumulative(canvas, sim, ctx) {
-  const { cur, s, machineName, modelName } = ctx;
+  const { cur, s, machineName, apiName } = ctx;
   // Data jsou už v cílové měně; formátovače berou CZK, proto `back`.
   const back = (v) => (cur === 'EUR' ? v * s.eurCzk : v);
   const pts = (key) => sim.rows.map((r) => ({ x: r.month, y: r[key] == null ? null : toCurrency(r[key], cur, s) }));
@@ -76,7 +76,7 @@ export function renderCumulative(canvas, sim, ctx) {
 
   const data = {
     datasets: [
-      line(`API · ${modelName}`, pts('apiCum'), css('--api')),
+      line(apiName, pts('apiCum'), css('--api')),
       line(`Vlastní HW · ${machineName}`, pts('hwCum'), css('--hw')),
     ],
   };
@@ -113,7 +113,7 @@ export function renderPerMillion(canvas, usage, machine, model, ctx) {
 
   const data = {
     datasets: [
-      line(`API · ${model.name}`, points.map((p) => ({ x: p.v, y: conv(p.api) })), css('--api')),
+      line(ctx.apiName, points.map((p) => ({ x: p.v, y: conv(p.api) })), css('--api')),
       line(`Vlastní HW · ${machine.name}`, points.map((p) => ({ x: p.v, y: conv(p.hw) })), css('--hw')),
       {
         label: 'Vaše spotřeba',

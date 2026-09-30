@@ -19,6 +19,15 @@ export function apiMonthlyCzk(inM, outM, model, s, priceFactor = 1) {
   return usd * priceFactor * s.usdCzk;
 }
 
+/**
+ * Měsíční platba dnešnímu poskytovateli v CZK: předplatné (offer.seatUsd) za každého
+ * zaměstnance bez ohledu na spotřebu a bez poklesu cen, jinak za tokeny.
+ */
+export function providerMonthlyCzk(load, offer, s, priceFactor = 1) {
+  if (offer.seatUsd != null) return load.employees * offer.seatUsd * s.usdCzk;
+  return apiMonthlyCzk(load.inM, load.outM, offer, s, priceFactor);
+}
+
 /** Strojové sekundy, které měsíční objem zabere na jednom kusu (prefill + decode). */
 export function workSeconds(inM, outM, machine) {
   return (inM * 1e6) / machine.prefillTps + (outM * 1e6) / machine.decodeTps;
@@ -96,7 +105,7 @@ export function simulate(usage, machine, model, s) {
 
   for (let m = 1; m <= s.horizonMonths; m++) {
     const load = loadAt(m);
-    const api = apiMonthlyCzk(load.inM, load.outM, model, s, decline ** ((m - 1) / 12));
+    const api = providerMonthlyCzk(load, model, s, decline ** ((m - 1) / 12));
     const prev = rows[m - 1];
     const row = { month: m, inM: load.inM, outM: load.outM, api, apiCum: prev.apiCum + api };
 
@@ -143,13 +152,14 @@ export function paybackMonth(rows) {
 
 /**
  * Cena za 1M tokenů v ustáleném stavu (bez růstu a poklesu cen):
+ * Předplatné se rozpočítá na zadaný objem (počet zaměstnanců je pevný).
  * HW = pořízení rozpočítané na horizont + provoz, dělené objemem.
  * hw = null, když stroj tenhle objem nezvládne ani s maxUnits kusy.
  */
 export function costPerMillion(totalM, inShare, usage, machine, model, s) {
   const inM = totalM * inShare;
   const outM = totalM - inM;
-  const api = apiMonthlyCzk(inM, outM, model, s) / totalM;
+  const api = providerMonthlyCzk({ ...usage, inM, outM }, model, s) / totalM;
   const need = sizing({ ...usage, inM, outM }, machine, s);
   if (!need.feasible) return { hw: null, api, units: need.units };
   const capexCzk = need.units * machine.priceUsd * s.usdCzk;

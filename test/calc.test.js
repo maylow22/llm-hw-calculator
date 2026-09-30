@@ -6,6 +6,7 @@ import {
   costPerMillion,
   hwOpexCzk,
   peakLoad,
+  providerMonthlyCzk,
   simulate,
   sizing,
   volumeFromUsers,
@@ -162,4 +163,14 @@ test('cena za 1M: HW klesá s objemem, API je konstantní, nad limit kusů null'
   assert.equal(small.hw, 1200 / 36 / 100);
   assert.ok(big.hw < small.hw);
   assert.equal(costPerMillion(MONTH_M * 3, 1, FLAT, { ...MACHINE, maxUnits: 2 }, MODEL, S).hw, null);
+});
+
+test('předplatné: cena za zaměstnance nezávisle na tokenech, bez poklesu cen i při růstu', () => {
+  const PLAN = { seatUsd: 10 };
+  assert.equal(providerMonthlyCzk({ employees: 50, inM: 1e6, outM: 1e6 }, PLAN, { ...S, usdCzk: 2 }), 1000);
+  const r = simulate({ ...usage(100, 0, 5), employees: 20 }, MACHINE, PLAN, { ...S, apiDeclinePctYear: 50 });
+  assert.equal(r.rows[1].api, 200);
+  assert.equal(r.rows[13].api, 200);
+  // 200 za měsíc na 100M tokenů → 2 za 1M
+  assert.equal(costPerMillion(100, 1, { ...FLAT, employees: 20 }, MACHINE, PLAN, S).api, 2);
 });
