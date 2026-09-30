@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LLM HW kalkulačka</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="wrap">
+    <header class="top">
+      <div>
+        <h1>Vlastní AI hardware, nebo API?</h1>
+        <p class="muted">Kdy se vyplatí provozovat LLM na vlastním stroji místo placení za tokeny.</p>
+      </div>
+      <div class="top-actions">
+        <div class="seg" role="group" aria-label="Měna">
+          <button type="button" data-cur="CZK">CZK</button>
+          <button type="button" data-cur="EUR">EUR</button>
+        </div>
+        <button type="button" id="open-settings" class="icon" title="Nastavení cen" aria-label="Nastavení cen">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7Zm7.4-2.5.1-1-.1-1 2.1-1.6-2-3.5-2.5 1a7.3 7.3 0 0 0-1.7-1L15 3.3h-4l-.3 2.6c-.6.3-1.2.6-1.7 1l-2.5-1-2 3.5L6.6 11l-.1 1 .1 1-2.1 1.6 2 3.5 2.5-1c.5.4 1.1.7 1.7 1l.3 2.6h4l.3-2.6c.6-.3 1.2-.6 1.7-1l2.5 1 2-3.5-2.1-1.6Z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <section class="controls">
+      <div class="card">
+        <h2><span class="step">1</span>Spotřeba</h2>
+        <div class="row2">
+          <label title="Kolik lidí bude AI používat."><span>Zaměstnanci</span><input id="employees" type="number" min="0" step="1"></label>
+          <label title="O kolik procent měsíčně spotřeba roste."><span>Růst <em>%/měs.</em></span><input id="growthPct" type="number" min="0" step="any"></label>
+        </div>
+        <div class="levels" role="group" aria-label="Úroveň spotřeby" id="levels"></div>
+        <p id="usage-summary" class="spec"></p>
+        <details>
+          <summary>Upravit podrobnosti</summary>
+          <div class="row5">
+            <label title="Kolik dotazů pošle jeden zaměstnanec za pracovní den (u agentů každé volání modelu)."><span>Dotazů <em>os./den</em></span><input id="queries" type="number" min="0" step="any"></label>
+            <label title="Průměrná velikost jednoho dotazu včetně kontextu: otázka, úryvky dokumentů, historie konverzace."><span>Vstup/dotaz <em>tok.</em></span><input id="inTok" type="number" min="0" step="any"></label>
+            <label title="Průměrná délka jedné odpovědi. U API je výstup několikrát dražší než vstup."><span>Výstup/dotaz <em>tok.</em></span><input id="outTok" type="number" min="0" step="any"></label>
+            <label title="Kolik dní v měsíci se systém používá."><span>Dny <em>/měs.</em></span><input id="daysMonth" type="number" min="1" max="31" step="any"></label>
+            <label title="Kolikrát je zátěž v nejrušnější hodině vyšší než průměr přes celý měsíc (24 h × 30 dní). Provoz jen v pracovní době 10 h × 22 dní ≈ 3,3×, ranní nával víc. Podle špičky se počítá počet kusů HW."><span>Špička <em>× průměr</em></span><input id="peak" type="number" min="1" step="any"></label>
+          </div>
+        </details>
+      </div>
+      <div class="card">
+        <h2><span class="step">2</span>Vlastní hardware</h2>
+        <select id="machine" aria-label="Stroj"></select>
+        <p id="machine-spec" class="spec"></p>
+      </div>
+      <div class="card">
+        <h2><span class="step">3</span>Dnešní poskytovatel</h2>
+        <select id="model" aria-label="Model API"></select>
+        <p id="model-spec" class="spec"></p>
+      </div>
+    </section>
+
+    <section id="kpis" class="kpis" aria-live="polite"></section>
+    <ul id="warnings" class="warnings" hidden></ul>
+
+    <section class="panel">
+      <div class="tabs" role="tablist">
+        <button type="button" role="tab" data-tab="cum">Kumulativní náklady</button>
+        <button type="button" role="tab" data-tab="per1m">Cena za 1M tokenů</button>
+        <button type="button" role="tab" data-tab="compare">Srovnání strojů</button>
+      </div>
+      <div role="tabpanel" data-tab="cum">
+        <p class="hint">API roste s každým měsícem provozu, vlastní HW začíná pořizovací cenou a pak roste jen o provoz. Průsečík je bod návratnosti.</p>
+        <div class="chart-box"><canvas id="c-cum"></canvas></div>
+      </div>
+      <div role="tabpanel" data-tab="per1m" hidden>
+        <p class="hint">Cena API za token je stálá, vlastní HW s objemem zlevňuje. Schody jsou dokoupení dalšího kusu; křivka HW končí tam, kde stroj nestačí ani s maximálním počtem kusů.</p>
+        <div class="chart-box"><canvas id="c-per1m"></canvas></div>
+      </div>
+      <div role="tabpanel" data-tab="compare" hidden>
+        <p class="hint">Všechny stroje pro zadanou spotřebu a model. Kliknutím na řádek stroj vybereš.</p>
+        <div class="table-wrap"><table id="compare" class="compare"></table></div>
+      </div>
+    </section>
+
+    <footer class="note muted">
+      Výchozí ceny k <span id="as-of"></span> (API ceníky, ČNB kurz, ceny HW v USD). Propustnost strojů je hrubý odhad
+      pro referenční open-weight model; kvalita lokálního modelu se od API modelu liší. Orientační výpočet, ne nabídka.
+    </footer>
+  </main>
+  <dialog id="settings"></dialog>
+
+  <script src="vendor/chart.umd.min.js"></script>
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
