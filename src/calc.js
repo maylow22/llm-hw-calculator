@@ -15,16 +15,16 @@ export function volumeFromUsers(u) {
 /** Měsíční platba za API v CZK. priceFactor modeluje pokles cen v čase. */
 export function apiMonthlyCzk(inM, outM, model, s, priceFactor = 1) {
   const cache = s.cacheSharePct / 100;
-  const usd = inM * (1 - cache) * model.in + inM * cache * model.cached + outM * model.out;
-  return usd * priceFactor * s.usdCzk;
+  const eur = inM * (1 - cache) * model.in + inM * cache * model.cached + outM * model.out;
+  return eur * priceFactor * s.eurCzk;
 }
 
 /**
- * Měsíční platba dnešnímu poskytovateli v CZK: předplatné (offer.seatUsd) za každého
+ * Měsíční platba dnešnímu poskytovateli v CZK: předplatné (offer.seatEur) za každého
  * zaměstnance bez ohledu na spotřebu a bez poklesu cen, jinak za tokeny.
  */
 export function providerMonthlyCzk(load, offer, s, priceFactor = 1) {
-  if (offer.seatUsd != null) return load.employees * offer.seatUsd * s.usdCzk;
+  if (offer.seatEur != null) return load.employees * offer.seatEur * s.eurCzk;
   return apiMonthlyCzk(load.inM, load.outM, offer, s, priceFactor);
 }
 
@@ -92,7 +92,7 @@ export function hwOpexCzk(units, util, machine, s, capexCzk) {
  * Jakmile by bylo potřeba víc než maxUnits kusů, HW křivka končí (hwCum = null).
  */
 export function simulate(usage, machine, model, s) {
-  const unitPriceCzk = machine.priceUsd * s.usdCzk;
+  const unitPriceCzk = machine.priceEur * s.eurCzk;
   const growth = 1 + usage.growthPct / 100;
   const decline = 1 - s.apiDeclinePctYear / 100;
   const loadAt = (m) => ({ ...usage, inM: usage.inM * growth ** (m - 1), outM: usage.outM * growth ** (m - 1) });
@@ -162,7 +162,7 @@ export function costPerMillion(totalM, inShare, usage, machine, model, s) {
   const api = providerMonthlyCzk({ ...usage, inM, outM }, model, s) / totalM;
   const need = sizing({ ...usage, inM, outM }, machine, s);
   if (!need.feasible) return { hw: null, api, units: need.units };
-  const capexCzk = need.units * machine.priceUsd * s.usdCzk;
+  const capexCzk = need.units * machine.priceEur * s.eurCzk;
   const util = avgUtil(inM, outM, machine, need.units);
   const hwMonthly = capexCzk / s.horizonMonths + hwOpexCzk(need.units, util, machine, s, capexCzk).total;
   return { hw: hwMonthly / totalM, api, units: need.units };

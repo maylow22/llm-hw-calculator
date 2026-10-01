@@ -14,7 +14,6 @@ import {
 
 // Kurz 1 a nulové vedlejší náklady → čísla se dají spočítat z hlavy.
 const S = {
-  usdCzk: 1,
   eurCzk: 1,
   electricityCzkKwh: 0,
   pue: 1,
@@ -29,7 +28,7 @@ const MODEL = { in: 1, cached: 0.1, out: 10 };
 // 1 000 tok/s prefill i decode → 2 628 M tokenů za měsíc na kus; limity souběhu a kusů
 // nastavené tak, aby nepřekážely, pokud je test sám nezkoumá.
 const MACHINE = {
-  priceUsd: 1200,
+  priceEur: 1200,
   kw: 0,
   prefillTps: 1000,
   decodeTps: 1000,
@@ -48,7 +47,7 @@ const usage = (inM, outM = 0, growthPct = 0) => ({ ...FLAT, inM, outM, growthPct
 test('API platba počítá vstup, cache a výstup zvlášť', () => {
   assert.equal(apiMonthlyCzk(100, 10, MODEL, S), 100 + 100);
   assert.equal(apiMonthlyCzk(100, 0, MODEL, { ...S, cacheSharePct: 50 }), 50 + 5);
-  assert.equal(apiMonthlyCzk(100, 0, MODEL, { ...S, usdCzk: 20 }, 0.5), 1000);
+  assert.equal(apiMonthlyCzk(100, 0, MODEL, { ...S, eurCzk: 20 }, 0.5), 1000);
 });
 
 test('průměrné vytížení podle prefill a decode', () => {
@@ -166,8 +165,8 @@ test('cena za 1M: HW klesá s objemem, API je konstantní, nad limit kusů null'
 });
 
 test('předplatné: cena za zaměstnance nezávisle na tokenech, bez poklesu cen i při růstu', () => {
-  const PLAN = { seatUsd: 10 };
-  assert.equal(providerMonthlyCzk({ employees: 50, inM: 1e6, outM: 1e6 }, PLAN, { ...S, usdCzk: 2 }), 1000);
+  const PLAN = { seatEur: 10 };
+  assert.equal(providerMonthlyCzk({ employees: 50, inM: 1e6, outM: 1e6 }, PLAN, { ...S, eurCzk: 2 }), 1000);
   const r = simulate({ ...usage(100, 0, 5), employees: 20 }, MACHINE, PLAN, { ...S, apiDeclinePctYear: 50 });
   assert.equal(r.rows[1].api, 200);
   assert.equal(r.rows[13].api, 200);

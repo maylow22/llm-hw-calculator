@@ -2,7 +2,6 @@
 import { PRICES_AS_OF } from './data.js';
 
 const GENERAL = [
-  ['usdCzk', 'Kurz USD', 'Kč'],
   ['eurCzk', 'Kurz EUR', 'Kč'],
   ['electricityCzkKwh', 'Cena elektřiny', 'Kč/kWh'],
   ['pue', 'PUE (chlazení, ztráty)', '×'],
@@ -16,7 +15,7 @@ const GENERAL = [
 
 const MACHINE_COLS = [
   ['name', 'Stroj', 'text'],
-  ['priceUsd', 'Cena USD'],
+  ['priceEur', 'Cena EUR'],
   ['kw', 'kW'],
   ['prefillTps', 'Prefill tok/s'],
   ['decodeTps', 'Decode tok/s'],
@@ -31,15 +30,15 @@ const MACHINE_COLS = [
 const MODEL_COLS = [
   ['provider', 'Poskytovatel', 'text'],
   ['name', 'Model', 'text'],
-  ['in', 'Vstup $/1M'],
-  ['cached', 'Cache $/1M'],
-  ['out', 'Výstup $/1M'],
+  ['in', 'Vstup €/1M'],
+  ['cached', 'Cache €/1M'],
+  ['out', 'Výstup €/1M'],
 ];
 
 const PLAN_COLS = [
   ['provider', 'Poskytovatel', 'text'],
   ['name', 'Předplatné', 'text'],
-  ['seatUsd', '$/uživatel/měs.'],
+  ['seatEur', '€/uživatel/měs.'],
 ];
 
 /** Otevře dialog nad kopií cen; onSave(prices) dostane upravenou kopii, onReset() obnoví výchozí. */

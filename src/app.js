@@ -26,7 +26,7 @@ const load = () => ({ ...state.usage, ...volumeFromUsers(state.usage) });
 
 const other = (cur) => (cur === 'CZK' ? 'EUR' : 'CZK');
 
-// V režimu předplatného je „model“ tarif s cenou za uživatele (seatUsd).
+// V režimu předplatného je „model“ tarif s cenou za uživatele (seatEur).
 const offers = () => (state.billing === 'seats' ? state.prices.plans : state.prices.models);
 const seats = () => state.billing === 'seats';
 
@@ -162,18 +162,20 @@ function renderUsage(usage) {
     `špička ${String(usage.peak).replace('.', ',')}× průměru`;
 }
 
+const eur = (v) => `${v.toLocaleString('cs-CZ', { maximumFractionDigits: 5 })} €`;
+
 function renderSpecs(machine, model, s, usage) {
   const peakSeconds = (HOURS_PER_MONTH * 3600) / Math.max(1, usage.peak);
   const capacityInM = (machine.prefillTps * peakSeconds * (s.maxUtilPct / 100)) / 1e6;
-  const price = machine.priceUsd * s.usdCzk;
+  const price = machine.priceEur * s.eurCzk;
   $('#machine-spec').textContent =
     `${money(price, state.cur, s)} (${money(price, other(state.cur), s)}) · ` +
     `kus zvládne ~${tokens(capacityInM)} vstupních tokenů/měs. při zadané špičce, max. ${machine.maxUnits} ks · ` +
     `referenční model ${machine.refModel}`;
   $('#model-spec').textContent = seats()
-    ? `$${model.seatUsd} za uživatele/měs. × ${usage.employees.toLocaleString('cs-CZ')} zaměstnanců, ` +
+    ? `${eur(model.seatEur)} za uživatele/měs. × ${usage.employees.toLocaleString('cs-CZ')} zaměstnanců, ` +
       'nezávisle na spotřebě · tarify mají limity použití, agenty a velké objemy nemusí pokrýt'
-    : `$${model.in} vstup · $${model.cached} cache · $${model.out} výstup za 1M tokenů`;
+    : `${eur(model.in)} vstup · ${eur(model.cached)} cache · ${eur(model.out)} výstup za 1M tokenů`;
 }
 
 function kpi(label, value, sub, tone = '') {
@@ -317,7 +319,7 @@ function renderCompare(usage, model, s) {
       : `<td class="${sim.savings >= 0 ? 'pos' : 'neg'}">${money(sim.savings, cur, s).replace('-', '−')}</td>`;
     return `<tr data-id="${m.id}" class="${cls}">
       <td>${m.name}</td>
-      <td>${money(m.priceUsd * s.usdCzk * sim.finalUnits, cur, s)}</td>
+      <td>${money(m.priceEur * s.eurCzk * sim.finalUnits, cur, s)}</td>
       <td>${sim.finalUnits}</td>
       <td>${pct(first.rho)}</td>
       <td>${seconds(first.latency)}</td>

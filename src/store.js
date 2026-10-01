@@ -1,7 +1,8 @@
 // Stav aplikace: výchozí data + úpravy cen uložené v prohlížeči.
 import { DEFAULT_MACHINES, DEFAULT_MODELS, DEFAULT_PLANS, DEFAULT_SETTINGS, DEFAULT_USAGE } from './data.js';
 
-const KEY = 'llm-hw-calculator.v1';
+// v2: ceny v EUR místo USD — úpravy uložené ve v1 by se s nimi pomíchaly
+const KEY = 'llm-hw-calculator.v2';
 
 function defaults() {
   return structuredClone({

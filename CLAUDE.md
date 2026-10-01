@@ -25,8 +25,8 @@ přepočítá vše a překreslí dlaždice, varování a aktivní záložku graf
 
 - `src/calc.js` — **jediné místo s logikou výpočtu**, čisté funkce bez DOM. Testy
   (`test/calc.test.js`) pokrývají jen tenhle soubor. Klíčové pojmy:
-  - vše interně v CZK; ceny API a HW jsou v datech v USD a převádí se `s.usdCzk`,
-    EUR je jen zobrazovací měna (`format.js`, `s.eurCzk`);
+  - vše interně v CZK; ceny API, HW i předplatného jsou v datech v EUR (dolarové ceníky přepočtené
+    kurzem) a převádí se `s.eurCzk`; EUR je zároveň zobrazovací měna (`format.js`);
   - objemy jsou v **milionech tokenů za měsíc** (`inM`, `outM`), vstup (prefill)
     a výstup (decode) se počítají zvlášť — nikdy jedno „mixed tok/s“;
   - objem se zadává přes zaměstnance × úroveň spotřeby (`USAGE_LEVELS` v `data.js`,
@@ -39,7 +39,7 @@ přepočítá vše a překreslí dlaždice, varování a aktivní záložku graf
     a stroj je „nezvládne“ — UI s `null` počítá, neměň to na 0.
 - `src/data.js` — výchozí stroje, modely API, nastavení a `PRICES_AS_OF`. Propustnosti
   strojů jsou hrubé odhady pro referenční model.
-- `src/store.js` — úpravy cen v `localStorage` (klíč `llm-hw-calculator.v1`). Při načtení
+- `src/store.js` — úpravy cen v `localStorage` (klíč `llm-hw-calculator.v2`). Při načtení
   se uložené stroje slučují s výchozími podle `id`, takže nové pole stroje v `data.js`
   se starým uživatelům doplní. Modely a nastavení se slučují méně chytře (modely se
   berou celé z uložených).

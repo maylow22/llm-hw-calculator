@@ -14,8 +14,9 @@ vlastní AI hardware místo placení LLM API za tokeny.
 - **Kapacita** se počítá odděleně pro vstup (prefill) a výstup (decode):
   potřebný čas = vstup / prefill_tps + výstup / decode_tps. RAG je silně
   vstupní, jedno „mixed tok/s“ by ho zkreslilo.
-- Interně vše v CZK; ceny API a HW uložené v USD (tak se kótují), převod
-  kurzem z nastavení. Zobrazení vždy v CZK i EUR.
+- Interně vše v CZK; ceny API, HW i předplatného uložené v EUR (dolarové
+  ceníky přepočtené kurzem ČNB), převod kurzem EUR z nastavení. Zobrazení
+  vždy v CZK i EUR.
 
 ## Rozhodnutí
 
@@ -27,21 +28,27 @@ vlastní AI hardware místo placení LLM API za tokeny.
 | Uložení úprav | localStorage | per-uživatel; sdílení sady cen až přes export JSON (v2) |
 | Testy | `node --test` jen na `calc.js` | veškerá logika, která může být špatně, je tam |
 
-## Výchozí data (k 29. 9. 2026, ověřit před veřejným nasazením)
+## Výchozí data (k 30. 9. 2026, ověřit před veřejným nasazením)
 
-Stroje (cena v USD, propustnost je hrubý odhad pro referenční model):
+Stroje (cena v EUR přepočtená z USD kurzem 0,8806, propustnost je hrubý odhad
+pro referenční model):
 
 | Stroj | Cena | kW | prefill tok/s | decode tok/s | Referenční model |
 |---|---|---|---|---|---|
-| Mac Studio M5 Ultra 512 GB | ~9 500 | 0,3 | 1 500 | 150 | gpt-oss-120b |
-| Stanice 1× RTX PRO 6000 | ~20 000 | 0,8 | 15 000 | 1 500 | gpt-oss-120b |
-| Server 2× RTX PRO 6000 | ~42 000 | 1,6 | 30 000 | 3 000 | gpt-oss-120b / Qwen3 |
-| HGX 8× H200 | ~370 000 | 10 | 150 000 | 15 000 | Qwen3-235B / DeepSeek |
-| HGX 8× B200 | ~450 000 | 14 | 300 000 | 30 000 | Qwen3-235B / DeepSeek |
+| Mac Studio M5 Ultra 512 GB | ~14 100 (odhad) | 0,3 | 1 500 | 150 | gpt-oss-120b |
+| Stanice 1× RTX PRO 6000 | ~17 600 | 0,8 | 15 000 | 1 500 | gpt-oss-120b |
+| Server 2× RTX PRO 6000 | ~37 000 | 1,6 | 30 000 | 3 000 | gpt-oss-120b / Qwen3 |
+| HGX 8× H200 | ~326 000 | 10 | 150 000 | 15 000 | Qwen3-235B / DeepSeek |
+| HGX 8× B200 | ~396 000 | 14 | 300 000 | 30 000 | Qwen3-235B / DeepSeek |
 
 Pozor: RTX PRO 6000 zdražila z 8,5k na 16k USD (2025→2026); 512GB Mac se
-dodává od konce října. API ceny: Anthropic, OpenAI (GPT-5.6 řada, 5.4 mini),
-Google (Gemini 3.1 Pro, 3.5 Flash/Flash-Lite). Cachovaný vstup u Gemini je odhad.
+dodává od konce října a Apple jeho cenu zatím nezveřejnil (256 GB stojí
+$9 499–10 799, počítáno s odhadem ~$16 000). API ceny: Anthropic (vč. Sonnet 5.5),
+OpenAI (GPT-6 Luna/Sol/Astra, 5.4 mini), Google (Gemini 3.1 Pro, 3.8 Flash
+— zaváděcí cena do 31. 12. 2026, pak dvojnásobek — a 3.5 Flash-Lite).
+Předplatné v EUR bez DPH při roční fakturaci: Claude Team 20 / Premium 100,
+ChatGPT Business 20, Enterprise ~60 (odhad, cena se vyjednává), Gemini 21 / 30.
+Že evropské ceníky kopírují dolarové číslo, je neověřený předpoklad.
 
 ## Fáze
 
