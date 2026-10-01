@@ -1,5 +1,7 @@
 # LLM HW kalkulačka
 
+**Demo:** https://llm-hw-calculator.vercel.app/
+
 Kdy se firmě vyplatí vlastní AI hardware místo placení LLM API za tokeny.
 Kumulativní náklady API vs. vlastní stroj, bod návratnosti, cena za 1M tokenů
 podle objemu a srovnání pěti strojů. Ceny v CZK i EUR, editovatelné v Nastavení.
